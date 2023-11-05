@@ -21,10 +21,7 @@
 
         <search-form></search-form>
 
-          <!-- pagination 
 
-          <paging-control paging-size="pagingSize" noofitem="dataPerPage" total-items="totalItems" display-items="displayItems" search-name="searchName" search-type="searchType" number-of-items="numberOfItems" finded-movies="findedMovies"></paging-control>
-        </div>-->
 
         <!-- movie details zone 
         <div class="center-align" ng-if="movieDetails.Response">
@@ -125,8 +122,23 @@
 
                 }
                 this.handleSearch = this.handleSearch.bind(this);
-                this.setPage = this.setPage.bind(this);
+
                 this.setPager = this.setPager.bind(this);
+                this.setPage = this.setPage.bind(this);
+                this.handleDetails = this.handleDetails.bind(this);
+            }
+            handleDetails = (event, title) => {
+                event.preventDefault();
+
+                // omdb settingss
+                const baseUrl = "http://www.omdbapi.com/";
+                const myApi = "a4a199c8"; 
+
+                fetch(`${baseUrl}?apikey=${myApi}&t=` + title).then(r => r.json()).then(j => {
+                    this.setState({
+                        movieDetails: j
+                    });
+                });
             }
             handleSearch = (event) => {
                 event.preventDefault();
@@ -141,8 +153,8 @@
                         movieName: event.target[0].value,
                         movieType: event.target[2].value,
                         numberOfItems: j.totalResults,
-                        
                     });
+                    this.setPager(j.totalResults, 1, this.state.itemPerPage);
                 });
                 
 
@@ -197,15 +209,18 @@
                 return;
                 
                 this.setPager(this.state.numberOfItems, currentPage, this.state.itemPerPage);
-                /*
-                http.get(`${baseUrl}?apikey=${myApi}&s=` + $scope.searchName + `&r=json&type=` + $scope.searchType +`&page=${currentPage}`).then( r  =>  {
-                    if(r.status === 200) {         
-                        $scope.findedMovies = r.data;
-                    }
-                    else {
-                        alert(`fetch error: got status ${r.status}`);
-                    }
-                }); */ 
+                
+                // omdb settingss
+                const baseUrl = "http://www.omdbapi.com/";
+                const myApi = "a4a199c8"; 
+
+                fetch(`${baseUrl}?apikey=${myApi}&s=` + this.state.movieName + `&r=json&type=` + this.state.movieType +`&page=${currentPage}`).then( r  =>  r.json()).then(j => {
+                    this.setState(
+                        {
+                            findedMovies: j
+                        }
+                    )
+                });
             };
             render() {
                 return <>
@@ -270,7 +285,7 @@
                                                 </span>
                                                 <br/>
                                                 <p>
-                                                    <button type='submit' className='btn waves-effect waves-light' name='detail-btn'>details</button>
+                                                    <button type='submit' onClick={event => this.handleDetails(event, movie.Title)} className='btn waves-effect waves-light' name='detail-btn'>details</button>
                                                     <span className='badge'>{movie.Year}</span>
                                                 </p>
                                             </div>
@@ -302,6 +317,67 @@
                                 </ul>
 
                             }</div>
+                        
+                            <div className="row">{ this.state.movieDetails != '' &&
+                                <div className='col s12'>
+
+                                <h6 className="center-align">Film info</h6>
+
+                                <div className='col s5'>
+                                    <img src={this.state.movieDetails.Poster} alt='Poster' className='responsive-img'/>
+                                </div>
+
+                                <div className='col s7'>
+                                    <table>
+                                        <tbody>
+
+                                            <tr>
+                                            <td><b>Title:</b></td>
+                                            <td>{this.state.movieDetails.Title}</td>
+                                            </tr>
+
+                                            <tr>
+                                            <td><b>Released:</b></td>
+                                            <td>{this.state.movieDetails.Released}</td>
+                                            </tr>
+
+                                            <tr>
+                                            <td><b>Genre:</b></td>
+                                            <td>{this.state.movieDetails.Genre}</td>
+                                            </tr>
+
+                                            <tr>
+                                            <td><b>Country:</b></td>
+                                            <td>{this.state.movieDetails.Country}</td>
+                                            </tr>
+
+                                            <tr>
+                                            <td><b>Director:</b></td>
+                                            <td>{this.state.movieDetails.Director}</td>
+                                            </tr>
+
+                                            <tr>
+                                            <td><b>Writer:</b></td>
+                                            <td>{this.state.movieDetails.Writer}</td>
+                                            </tr>
+
+                                            <tr>
+                                            <td><b>Actors:</b></td>
+                                            <td>{this.state.movieDetails.Actors}</td>
+                                            </tr>
+
+                                            <tr>
+                                            <td><b>Awards:</b></td>
+                                            <td>{this.state.movieDetails.Awards}</td>
+                                            </tr>
+
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                </div>
+                            }</div>
+
                         </div>
                     }
                 </>
