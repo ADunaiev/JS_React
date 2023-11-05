@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="mainApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React</title>
+    <!--Import Google Icon Font-->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        .green {
+            color: lime;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>React</h1>
+
+        <p>
+            React (React JS) - бібліотека для задач фронтенду. Аналогічно Angular існують дві можливості працювати з 
+            React - за допомогою JS модулів та через CLI. 
+        </p>
+
+        <p>
+            Концепція схожа з Angular - локалізація, утворення незалежних компонентів з власним околом
+            змінних. Головна відмінність - відсутність автоматичного спостереження за змінними і, як 
+            наслідок, потреба у "примусовому" виклику методів оновлення. Структура React також відрізняється, 
+            для його підключення потрібні декілька скриптів: <code>react</code> - ядро бібліотекі, 
+            "інструменти" створення (опису) компонентів;
+            <code>react-dom</code> - модуль взаємодії з DOM (з браузером), "інструмент" впровадження 
+            компонентів.
+        </p>
+        <div id="component1"></div>
+
+        <h2>JSX</h2>
+
+        <p>
+            З метою спрощення декларації елементів React був розробленний спеціальний синтаксис - 
+            <dfn>JSX</dfn>. Він схожий на HTML, але є "проміжним кодом" для перетворення у елементну 
+            форму. Це перетворення виконує спеціальний модуль <code>babel</code>. 
+            Відповідно, для демонстрації роботи з JSX необхідний ще один скрипт.
+        </p>
+        <p>
+            JSX скрипти мають бути позначені атрибутом
+            <code>type="text/babel"</code>, у т.ч. ті, що підключаються з окремого 
+            ресурсу (файлу).
+        </p>
+        <p>
+            <code style="color: red;"> Cannot read properties of undefined (reading 'setState')</code>
+
+            Ефект бібліотекі можна простежити і в тому, що подійний механізм береться від 
+            браузера. Встановлення обробників формально підписує метод класу до слухання подій. 
+            Це свідчить про те, що виклик методу буде відбуватись Subject-ом події, тобто об'єктом window. 
+            Пізне зв'язування дає ефект, що звернення до <code>this</code> буде вважатись як <code>window.this</code>, 
+            що є <code>underfined</code>.
+
+        </p>
+
+        <div id="component2"></div>
+
+        <rates></rates>
+        
+    </div>
+
+    <script src="https://unpkg.com/react@17/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script>
+        const e = React.createElement; // псевдонім - друге посилання
+        class Component1 extends React.Component {
+            render() {                          // правило композиції компонента
+                return React.createElement(     // основа - React.createElement
+                    'div',                       // 1. 'Тег' або Клас
+                    {                           // 2. props - параметри, що будуть 
+                        //style: {                // передаватись конструктору 
+                            //color: 'fuchsia'    // компонента - ініціалізація
+                        //},
+                        className: 'collection'                       //
+                    },                          // 3. Дочірні елементи - перелік або масив
+                    e('a', {href: "#!", className: 'collection-item'}, 'First item'), 
+                    e('a', {href: "#!", className: 'collection-item active'}, 'Second item'),
+                    [
+                        e('a', {href: "#!", className: 'collection-item'}, 'Third item'), 
+                        e('a', {href: "#!", className: 'collection-item'}, 'Fourth item'), 
+                    ],
+                    ["5th", "6th", "7th"].map(str => e('a', {href: "#!", className: 'collection-item'}, `${str} item`))
+                )
+            }
+        }
+
+        ReactDOM.render (React.createElement(Component1, null, null), 
+            document.getElementById("component1")
+        );
+    </script>
+
+    <script type="text/babel">
+        class Component2 extends React.Component {
+            constructor(props) {
+                super(props);  // у C# - base - звернення до батьківського класу
+                console.log(props);
+                this.state = {  // певний аналог $scope (з Angular)
+                    cnt: props.cnt || 100    // саме його оновлення буде призводити до пере-рисування - 
+                                // зміни відображення 
+                }
+                this.plusButtonClick = this.plusButtonClick.bind(this);
+                this.minusButtonClick = this.minusButtonClick.bind(this);
+            }
+            plusButtonClick() {
+                // this.state.cnt ++; - так не працює, авто-спостереження немає
+                this.setState( // з React.Component 
+                    {cnt: +this.state.cnt + 1}
+                ); 
+            }
+            minusButtonClick() {
+                this.setState (    // авріант - з модифікацією стану
+                    state => {     // приходить наявний стан
+                        state.cnt -= 1;  // модифікуємо 
+                        return state;    // повертаємо змінений стан
+                    }
+                );
+            }
+            render() {
+                    // React.Fragment - контейнер для елементів без проміжного DOM
+                    return <>
+                                <h3>Hello from JSX</h3>
+                                <p>
+                                    <button onClick={this.minusButtonClick} className="btn waves-effect waves-light">--</button>
+                                     {this.state.cnt}  
+                                    <button onClick={this.plusButtonClick} className="btn waves-effect waves-light">++</button>
+                                </p>
+                           </>
+                }
+            }
+
+        ReactDOM.render(<Component2 cnt="200"/>, 
+            document.getElementById("component2")
+        );
+    </script>
+
+    <script type="text/babel">
+        class Rates extends React.Component {
+            constructor(props) {
+                super(props);
+                this.state = {
+                    rates: []    // на старті порожній масив даних (але оголошений)   
+                }
+            }
+            loadRates() {
+                const url = "https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?json";
+
+                fetch(url).then(r => r.json()).then(j => {
+                    this.setState( { rates: j});
+                });
+
+            }
+            componentDidMount() {    // подія React.Component - монтування об'єкту
+                this.loadRates();
+            }
+            render() {
+                return <>
+                            <h3>Курс валют {this.state.rates[0] && <i>за {this.state.rates[0].exchangedate}</i>}</h3>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Назва</th>
+                                        <th>Гривень за одиницю</th>
+                                    </tr>
+                                </thead>
+                                <tbody>{
+                                    this.state.rates.map(rate =>
+                                        <tr key={rate.r030}>
+                                            <td>{rate.txt}</td>
+                                            <td>{rate.rate}</td>
+                                        </tr> 
+                                    )
+                                }</tbody>
+                            </table>
+                       </>
+            }
+
+        }
+
+        ReactDOM.render(<Rates/>, document.querySelector('rates'));
+    </script>
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+</body>
+</html>
